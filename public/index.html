@@ -8,60 +8,198 @@
 <body>
     <div id="login-screen" class="main-card">
         <h1>Bienvenida a Aura</h1>
-        <input type="text" id="nombre" placeholder="Nombre (Selena, Aurora, Ema)">
-        <button onclick="iniciarSesion()">Ingresar</button>
+        <p>Perfil de Ingreso:</p>
+        <input type="text" id="nombre" placeholder="Nombre (Ej: Selena, Aurora, Ema)">
+        <div id="registro-edad-box" style="display:none; margin-top: 10px;">
+            <p style="color: var(--accent); font-size: 0.9em;">Usuario nuevo detectado. Por favor, ingresa tu edad:</p>
+            <input type="number" id="edad-registro" placeholder="Edad" min="10" max="100">
+        </div>
+        <button onclick="verificarOIngresar()">Ingresar</button>
     </div>
 
     <div id="app-screen" class="main-card" style="display:none;">
         <h1 id="title-app">Aura</h1>
         <h2 id="saludo"></h2>
-        <p id="tipo-perfil" style="font-weight:bold;"></p>
         
         <div class="content-box">
-            <p id="perfil-contenido"></p>
+            <h3>Perfil de Usuario</h3>
+            <p><strong>Tipo de Perfil:</strong> <span id="tipo-perfil"></span></p>
+            <p><strong>Edad actual:</strong> <span id="edad-actual"></span> años</p>
+        </div>
+
+        <div class="content-box" style="border-left-color: var(--accent); text-align: left;">
+            <h3>Módulo de Educación Sexual Integral</h3>
+            <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
+                <b>Enfoque del sitio:</b> <span id="perfil-enfoque"></span>
+            </p>
+            
+            <div id="perfil-menu-bloques" style="margin-top: 10px;"></div>
+            
+            <div class="reminder" id="bloque-acompanar" style="margin-top: 15px; font-size: 0.85em;">
+                </div>
+
+            <div class="contact-list" id="bloque-chile" style="margin-top: 10px;">
+                </div>
         </div>
 
         <div class="content-box">
-            <h3>Registrar Periodo</h3>
-            <input type="date" id="inicio-ciclo"> a <input type="date" id="fin-ciclo">
-            <button class="btn-cita" onclick="registrarDato('ciclo')">+ Registrar</button>
+            <h3>Registrar Periodo Menstrual</h3>
+            <input type="date" id="inicio-ciclo"> 
+            <input type="date" id="fin-ciclo">
+            <button class="btn-cita" onclick="registrarDato('ciclo')">+ Registrar Sangrado</button>
             <ul id="lista-ciclos"></ul>
         </div>
 
         <div id="cita-section" class="content-box" style="display:none;">
             <h3>Citas Médicas</h3>
             <input type="date" id="fecha-cita">
-            <button class="btn-cita" onclick="registrarDato('cita')">+ Agendar</button>
+            <button class="btn-cita" onclick="registrarDato('cita')">+ Agendar Cita</button>
             <ul id="lista-citas"></ul>
         </div>
+
+        <div class="content-box" style="border-left-color: var(--salmon);">
+            <h3>Contactos de Emergencia (SOS)</h3>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="nuevo-contacto" placeholder="Nombre del contacto (Ej: Hermana)" style="width:60%;">
+                <button onclick="agregarContacto()" class="btn-cita" style="width:40%; margin-top:8px;">+ Configurar</button>
+            </div>
+            <ul id="lista-contactos" style="margin-top: 10px; padding-left: 20px;"></ul>
+        </div>
         
-        <button class="btn-panic" onclick="alertaPanico()">BOTÓN DE PÁNICO (SOS)</button>
+        <button class="btn-panic" onclick="alertaPanico()"> BOTÓN DE PÁNICO (SOS)</button>
         <button onclick="location.reload()" style="background:#666; width:100%; margin-top:10px;">Cerrar Sesión</button>
-        <div id="coordenadas"></div>
+        <div id="coordenadas" style="margin-top:10px; font-weight:bold; color:#ff4757;"></div>
+
+        <div style="margin-top: 25px; text-align: left;">
+            <h4 style="color: #2f3542; margin-bottom: 8px;">Logs de Respuesta (Códigos HTTP)</h4>
+            <div id="log-console" style="background: #1e1e1e; color: #00ff00; font-family: 'Courier New', monospace; padding: 15px; border-radius: 10px; font-size: 0.85em; max-height: 150px; overflow-y: auto; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
+                <span style="color: #aaa;">Esperando acciones del usuario...</span>
+            </div>
+        </div>
     </div>
 
     <script>
         let usuarioActual = "";
+        let edadActual = 0;
+
         const usuarios = { "Selena": 10, "Aurora": 15, "Ema": 22 };
 
-        async function iniciarSesion() {
-            usuarioActual = document.getElementById('nombre').value;
-            const edad = usuarios[usuarioActual];
-            if (edad) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-screen').style.display = 'block';
-                document.getElementById('saludo').innerText = `Hola ${usuarioActual}!`;
-                
-                const res = await fetch(`/api/perfil/${edad}`);
-                const data = await res.json();
-                document.getElementById('tipo-perfil').innerText = data.perfil_tipo;
-                document.getElementById('perfil-contenido').innerText = data.contenido;
-
-                if (edad >= 14) document.getElementById('cita-section').style.display = 'block';
-                
-                const hist = await fetch(`/api/historial/${usuarioActual}`);
-                renderizarHistorial(await hist.json());
+        function registrarLog(mensaje, status) {
+            const consoleBox = document.getElementById('log-console');
+            const hora = new Date().toLocaleTimeString();
+            
+            if (consoleBox.innerText.includes("Esperando acciones")) {
+                consoleBox.innerHTML = "";
             }
+            
+            const nuevoLog = `<div>[${hora}] <span style="color: #ff9f43;">[HTTP ${status}]</span> ${mensaje}</div>`;
+            consoleBox.innerHTML += nuevoLog;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function verificarOIngresar() {
+            usuarioActual = document.getElementById('nombre').value.trim();
+            if(!usuarioActual) return alert("Por favor ingresa un nombre");
+
+            if (usuarios[usuarioActual]) {
+                edadActual = usuarios[usuarioActual];
+                cargarAplicacion();
+                registrarLog(`Sesión iniciada. Usuario: ${usuarioActual}.`, 200);
+            } else {
+                const registroBox = document.getElementById('registro-edad-box');
+                if (registroBox.style.display === 'none') {
+                    registroBox.style.display = 'block';
+                } else {
+                    const edadIngresada = parseInt(document.getElementById('edad-registro').value);
+                    if (!edadIngresada || edadIngresada < 10) return alert("Ingresa una edad válida (Mínimo 10 años)");
+                    usuarios[usuarioActual] = edadIngresada;
+                    edadActual = edadIngresada;
+                    cargarAplicacion();
+                    registrarLog(`Usuario nuevo creado en el sistema: ${usuarioActual} (${edadActual} años).`, 201);
+                }
+            }
+        }
+
+        async function cargarAplicacion() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('saludo').innerText = `¡Hola, ${usuarioActual}!`;
+            document.getElementById('edad-actual').innerText = edadActual;
+
+            await consultarConsejos();
+
+            if (edadActual >= 14) {
+                document.getElementById('cita-section').style.display = 'block';
+            } else {
+                document.getElementById('cita-section').style.display = 'none';
+            }
+            
+            const hist = await fetch(`/api/historial/${usuarioActual}`);
+            registrarLog(`Historial de datos recuperado de la memoria local.`, hist.status);
+            renderizarHistorial(await hist.json());
+
+            await obtenerContactos();
+        }
+
+        async function actualizarEdad() {
+            const nuevaEdad = parseInt(document.getElementById('nueva-edad').value);
+            if (!nuevaEdad || nuevaEdad < 10) return alert("Ingresa una edad válida");
+            
+            usuarios[usuarioActual] = nuevaEdad;
+            edadActual = nuevaEdad;
+            document.getElementById('nueva-edad').value = "";
+            alert("Perfil de usuario actualizado con éxito.");
+            registrarLog(`Edad modificada. Re-evaluando perfil a: ${edadActual} años.`, 200);
+            await cargarAplicacion();
+        }
+
+        async function consultarConsejos() {
+            const res = await fetch(`/api/perfil/${edadActual}`);
+            registrarLog(`API solicitada para mapear contenido educativo vía Factoría.`, res.status);
+            const data = await res.json();
+            
+            document.getElementById('tipo-perfil').innerText = data.perfil_tipo;
+            document.getElementById('perfil-enfoque').innerText = data.contenido.enfoque;
+            
+            const menuHtml = data.contenido.menu.map(item => `
+                <div style="background: #fff; border: 1px solid #e0e0e0; padding: 10px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <h4 style="margin: 0 0 5px 0; color: var(--primary); font-size: 0.95em;">📌 ${item.titulo}</h4>
+                    <p style="margin: 0; font-size: 0.85em; color: #444;">${item.detalle}</p>
+                </div>
+            `).join('');
+            document.getElementById('perfil-menu-bloques').innerHTML = menuHtml;
+            
+            document.getElementById('bloque-acompanar').innerHTML = `
+                <b>¿Cómo acompañar sin invadir?:</b> ${data.contenido.acompanamiento} 
+                <br><small style="color:#777;">Hablar de sexualidad de manera progresiva construye un cuidado seguro del cuerpo.</small>
+            `;
+            
+            document.getElementById('bloque-chile').innerHTML = `
+                <h4>🇨🇱 Orientación y Apoyo Regional</h4>
+                <p style="margin:5px 0;">${data.contenido.soporte}</p>
+                <span style="font-size:0.9em; color:#d9381e;"><b>Cuándo consultar:</b> Sospecha de ITS, dolores, violencia, presión o dudas sobre anticonceptivos (incluida la píldora del día después en CESFAM/Espacios Amigables).</span>
+            `;
+        }
+
+        async function agregarContacto() {
+            const nombreContacto = document.getElementById('nuevo-contacto').value.trim();
+            if(!nombreContacto) return alert("Escribe el nombre del contacto");
+
+            const res = await fetch('/api/contactos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nombre: nombreContacto })
+            });
+            
+            registrarLog(`Contacto añadido con éxito al Subject del Observer: "${nombreContacto}".`, res.status);
+            document.getElementById('nuevo-contacto').value = "";
+            await obtenerContactos();
+        }
+
+        async function obtenerContactos() {
+            const res = await fetch('/api/contactos');
+            const contactos = await res.json();
+            document.getElementById('lista-contactos').innerHTML = contactos.map(c => `<li>${c}</li>`).join('');
         }
 
         async function registrarDato(tipo, accion = 'registrar', index = null) {
@@ -71,23 +209,36 @@
                 fecha: document.getElementById('fecha-cita').value 
             };
             const res = await fetch('/api/datos', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+            
+            if (accion === 'eliminar') {
+                registrarLog(`Registro eliminado correctamente del bloque [${tipo}].`, res.status);
+            } else {
+                registrarLog(`Información de salud enviada con éxito al módulo [${tipo}].`, res.status);
+            }
+            
             renderizarHistorial((await res.json()).historial);
         }
 
         function renderizarHistorial(h) {
             document.getElementById('lista-ciclos').innerHTML = h.ciclos.map((c, i) => 
-                `<li>${c.inicio} al ${c.fin} (${c.duracion} días) 
-                <button onclick="registrarDato('ciclo', 'eliminar', ${i})">Eliminar</button></li>`).join('');
+                `<li>${c.inicio} al ${c.fin} (<b>${c.duracion} días</b>) 
+                <button onclick="registrarDato('ciclo', 'eliminar', ${i})" style="padding:2px 8px; font-size:0.8em; width:auto; margin:0 0 0 10px; background:#ff4757;">X</button></li>`).join('');
 
             document.getElementById('lista-citas').innerHTML = h.citas.map((c, i) => 
                 `<li>Cita: ${c.fecha} 
-                <button onclick="registrarDato('cita', 'eliminar', ${i})">Eliminar</button></li>`).join('');
+                <button onclick="registrarDato('cita', 'eliminar', ${i})" style="padding:2px 8px; font-size:0.8em; width:auto; margin:0 0 0 10px; background:#ff4757;">X</button></li>`).join('');
         }
 
         async function alertaPanico() {
             const res = await fetch('/api/panico');
-            document.getElementById('coordenadas').innerText = await res.text();
+            const respuestaTexto = await res.text(); 
+            const mensajeEspejo = "[CRÍTICA] ¡Emergencia detectada! Necesito ayuda. | Ubicación: -20.21, -70.14";
+            
+            registrarLog(mensajeEspejo, res.status);
+            
+            document.getElementById('coordenadas').innerText = "Alerta crítica distribuida.";
         }
+
     </script>
 </body>
 </html>
