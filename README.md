@@ -9,7 +9,7 @@ Aura es una aplicación diseñada para brindar acompañamiento integral a niñas
 El sistema está desarrollado sobre un entorno desacoplado **Cliente-Servidor** utilizando Node.js y Express. Los datos de sesión y bitácoras de salud se administran de forma aislada localmente para garantizar el cumplimiento de los estándares de privacidad y rendimiento.
 
 ### Estructura de Directorios
-
+```text
 AURA_WEB/
 ├── public/                 # Capa de Presentación (Frontend)
 │   ├── index.html          # Interfaz gráfica interactiva y consola de logs
