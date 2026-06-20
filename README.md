@@ -5,3 +5,8 @@ Aura es una aplicación diseñada para brindar acompañamiento integral a niñas
 ## Arquitectura del Proyecto
 
 El sistema está desarrollado sobre un entorno desacoplado **Cliente-Servidor** utilizando Node.js y Express. Los datos de sesión y bitácoras de salud se administran de forma aislada localmente para garantizar el cumplimiento de los estándares de privacidad y rendimiento.
+
+## Credenciales de Acceso Rápido
+Selena (Infantil)
+Aurora (Adolescente)
+Ema (Adulto)
