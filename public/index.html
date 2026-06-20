@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Aura - Salud Integral</title>
+</head>
+<body>
+    <div id="login-screen" class="main-card">
+        <h1>Bienvenida a Aura</h1>
+        <input type="text" id="nombre" placeholder="Nombre (Selena, Aurora, Ema)">
+        <button onclick="iniciarSesion()">Ingresar</button>
+    </div>
+
+    <div id="app-screen" class="main-card" style="display:none;">
+        <h1 id="title-app">Aura</h1>
+        <h2 id="saludo"></h2>
+        <p id="tipo-perfil" style="font-weight:bold;"></p>
+        
+        <div class="content-box">
+            <p id="perfil-contenido"></p>
+        </div>
+
+        <div class="content-box">
+            <h3>Registrar Periodo</h3>
+            <input type="date" id="inicio-ciclo"> a <input type="date" id="fin-ciclo">
+            <button class="btn-cita" onclick="registrarDato('ciclo')">+ Registrar</button>
+            <ul id="lista-ciclos"></ul>
+        </div>
+
+        <div id="cita-section" class="content-box" style="display:none;">
+            <h3>Citas Médicas</h3>
+            <input type="date" id="fecha-cita">
+            <button class="btn-cita" onclick="registrarDato('cita')">+ Agendar</button>
+            <ul id="lista-citas"></ul>
+        </div>
+        
+        <button class="btn-panic" onclick="alertaPanico()">BOTÓN DE PÁNICO (SOS)</button>
+        <button onclick="location.reload()" style="background:#666; width:100%; margin-top:10px;">Cerrar Sesión</button>
+        <div id="coordenadas"></div>
+    </div>
+
+    <script>
+        let usuarioActual = "";
+        const usuarios = { "Selena": 10, "Aurora": 15, "Ema": 22 };
+
+        async function iniciarSesion() {
+            usuarioActual = document.getElementById('nombre').value;
+            const edad = usuarios[usuarioActual];
+            if (edad) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                document.getElementById('saludo').innerText = `Hola ${usuarioActual}!`;
+                
+                const res = await fetch(`/api/perfil/${edad}`);
+                const data = await res.json();
+                document.getElementById('tipo-perfil').innerText = data.perfil_tipo;
+                document.getElementById('perfil-contenido').innerText = data.contenido;
+
+                if (edad >= 14) document.getElementById('cita-section').style.display = 'block';
+                
+                const hist = await fetch(`/api/historial/${usuarioActual}`);
+                renderizarHistorial(await hist.json());
+            }
+        }
+
+        async function registrarDato(tipo, accion = 'registrar', index = null) {
+            const body = { usuario: usuarioActual, tipo, accion, index,
+                inicio: document.getElementById('inicio-ciclo').value,
+                fin: document.getElementById('fin-ciclo').value,
+                fecha: document.getElementById('fecha-cita').value 
+            };
+            const res = await fetch('/api/datos', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+            renderizarHistorial((await res.json()).historial);
+        }
+
+        function renderizarHistorial(h) {
+            document.getElementById('lista-ciclos').innerHTML = h.ciclos.map((c, i) => 
+                `<li>${c.inicio} al ${c.fin} (${c.duracion} días) 
+                <button onclick="registrarDato('ciclo', 'eliminar', ${i})">Eliminar</button></li>`).join('');
+
+            document.getElementById('lista-citas').innerHTML = h.citas.map((c, i) => 
+                `<li>Cita: ${c.fecha} 
+                <button onclick="registrarDato('cita', 'eliminar', ${i})">Eliminar</button></li>`).join('');
+        }
+
+        async function alertaPanico() {
+            const res = await fetch('/api/panico');
+            document.getElementById('coordenadas').innerText = await res.text();
+        }
+    </script>
+</body>
+</html>
