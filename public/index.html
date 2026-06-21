@@ -2,243 +2,796 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-    <title>Aura - Salud Integral</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura - Bienestar y Seguridad Adaptativa</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6a1b9a;      /* Púrpura de Aura */
+            --accent: #ff4081;       /* Rosado vibrante */
+            --salmon: #ff8a65;       /* Salmón para alertas y avisos */
+            --light-bg: #f3e5f5;
+            --dark-gray: #1e1e1e;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .console-box {
+            background-color: var(--dark-gray);
+            font-family: 'Fira Code', monospace;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .console-err { color: #ff3333; }
+        .console-success { color: #00ff00; }
+        .console-info { color: #00b0ff; }
+        .console-warning { color: #ffab00; }
+
+        .btn-sos {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+            box-shadow: 0 6px 20px rgba(183, 28, 28, 0.4);
+            animation: pulse 2s infinite;
+        }
+        .btn-sos:hover {
+            background: #9a1212;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(183, 28, 28, 0.5); }
+            70% { box-shadow: 0 0 0 12px rgba(183, 28, 28, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(183, 28, 28, 0); }
+        }
+    </style>
 </head>
-<body>
-    <div id="login-screen" class="main-card">
-        <h1>Bienvenida a Aura</h1>
-        <p>Perfil de Ingreso:</p>
-        <input type="text" id="nombre" placeholder="Nombre (Ej: Selena, Aurora, Ema)">
-        <div id="registro-edad-box" style="display:none; margin-top: 10px;">
-            <p style="color: var(--accent); font-size: 0.9em;">Usuario nuevo detectado. Por favor, ingresa tu edad:</p>
-            <input type="number" id="edad-registro" placeholder="Edad" min="10" max="100">
-        </div>
-        <button onclick="verificarOIngresar()">Ingresar</button>
-    </div>
+<body class="bg-gradient-to-tr from-purple-100 via-pink-50 to-purple-50 min-h-screen flex flex-col items-center">
 
-    <div id="app-screen" class="main-card" style="display:none;">
-        <h1 id="title-app">Aura</h1>
-        <h2 id="saludo"></h2>
-        
-        <div class="content-box">
-            <h3>Perfil de Usuario</h3>
-            <p><strong>Tipo de Perfil:</strong> <span id="tipo-perfil"></span></p>
-            <p><strong>Edad actual:</strong> <span id="edad-actual"></span> años</p>
+    <!-- Encabezado de la Aplicación -->
+    <header class="w-full bg-[#6a1b9a] text-white px-6 py-4 flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold tracking-wider flex items-center space-x-2">
+            <span>AURA</span>
+        </h1>
+        <div id="session-info" class="hidden flex items-center space-x-4">
+            <span class="font-semibold text-sm" id="user-display"></span> 
+            <button onclick="cerrarSesion()" class="bg-[#ff4081] hover:bg-[#d81b60] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-all">Cerrar Sesión</button>
         </div>
+    </header>
 
-        <div class="content-box" style="border-left-color: var(--accent); text-align: left;">
-            <h3>Módulo de Educación Sexual Integral</h3>
-            <p style="font-size: 0.85em; color: #666; margin-bottom: 10px;">
-                <b>Enfoque del sitio:</b> <span id="perfil-enfoque"></span>
-            </p>
-            
-            <div id="perfil-menu-bloques" style="margin-top: 10px;"></div>
-            
-            <div class="reminder" id="bloque-acompanar" style="margin-top: 15px; font-size: 0.85em;">
+    <!-- Contenedor de la Aplicación -->
+    <div class="w-full max-w-4xl p-4 md:p-6 flex flex-col gap-6">
+
+        <!-- 1. CARTA DE BIENVENIDA / LOGIN / REGISTRO -->
+        <div id="auth-card" class="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-purple-100 text-center">
+            <h2 id="auth-title" class="text-2xl font-bold text-[#6a1b9a] mb-2">Ingresar a Aura</h2>
+            <p id="auth-subtitle" class="text-gray-500 text-sm mb-6">Escribe tu nombre para iniciar tu sesión segura local.</p>
+
+            <!-- Formulario de Login -->
+            <div id="login-form" class="space-y-4">
+                <div class="text-left">
+                    <label class="block text-xs font-bold text-gray-600 mb-1" for="login-nombre">Nombre de Usuario:</label>
+                    <input type="text" id="login-nombre" placeholder="Ej: Selena, Aurora, Ema..." class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#6a1b9a] focus:outline-none transition-all">
                 </div>
-
-            <div class="contact-list" id="bloque-chile" style="margin-top: 10px;">
-                </div>
-        </div>
-
-        <div class="content-box">
-            <h3>Registrar Periodo Menstrual</h3>
-            <input type="date" id="inicio-ciclo"> 
-            <input type="date" id="fin-ciclo">
-            <button class="btn-cita" onclick="registrarDato('ciclo')">+ Registrar Sangrado</button>
-            <ul id="lista-ciclos"></ul>
-        </div>
-
-        <div id="cita-section" class="content-box" style="display:none;">
-            <h3>Citas Médicas</h3>
-            <input type="date" id="fecha-cita">
-            <button class="btn-cita" onclick="registrarDato('cita')">+ Agendar Cita</button>
-            <ul id="lista-citas"></ul>
-        </div>
-
-        <div class="content-box" style="border-left-color: var(--salmon);">
-            <h3>Contactos de Emergencia (SOS)</h3>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="nuevo-contacto" placeholder="Nombre del contacto (Ej: Hermana)" style="width:60%;">
-                <button onclick="agregarContacto()" class="btn-cita" style="width:40%; margin-top:8px;">+ Configurar</button>
+                <div id="login-error-msg" class="hidden text-red-500 text-xs text-left font-medium"></div>
+                <button onclick="intentarIngresar()" class="w-full bg-[#6a1b9a] hover:bg-[#511078] text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95">Ingresar</button>
+                <p class="text-xs text-gray-500 mt-4">
+                    ¿No estás registrada en este equipo? <span class="text-[#ff4081] underline cursor-pointer font-semibold" onclick="mostrarRegistro(true)">Registrarse aquí</span>
+                </p>
             </div>
-            <ul id="lista-contactos" style="margin-top: 10px; padding-left: 20px;"></ul>
-        </div>
-        
-        <button class="btn-panic" onclick="alertaPanico()"> BOTÓN DE PÁNICO (SOS)</button>
-        <button onclick="location.reload()" style="background:#666; width:100%; margin-top:10px;">Cerrar Sesión</button>
-        <div id="coordenadas" style="margin-top:10px; font-weight:bold; color:#ff4757;"></div>
 
-        <div style="margin-top: 25px; text-align: left;">
-            <h4 style="color: #2f3542; margin-bottom: 8px;">Logs de Respuesta (Códigos HTTP)</h4>
-            <div id="log-console" style="background: #1e1e1e; color: #00ff00; font-family: 'Courier New', monospace; padding: 15px; border-radius: 10px; font-size: 0.85em; max-height: 150px; overflow-y: auto; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
-                <span style="color: #aaa;">Esperando acciones del usuario...</span>
+            <!-- Formulario de Registro -->
+            <div id="register-form" class="hidden space-y-4">
+                <div class="text-left">
+                    <label class="block text-xs font-bold text-gray-600 mb-1" for="reg-nombre">Nombre Completo:</label>
+                    <input type="text" id="reg-nombre" placeholder="Ej: Daniela Montecinos" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#6a1b9a] focus:outline-none transition-all">
+                </div>
+                <div class="text-left">
+                    <label class="block text-xs font-bold text-gray-600 mb-1" for="reg-nacimiento">Fecha de Nacimiento:</label>
+                    <input type="date" id="reg-nacimiento" class="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#6a1b9a] focus:outline-none transition-all">
+                </div>
+                <div id="reg-error-msg" class="hidden text-red-500 text-xs text-left font-medium"></div>
+                <button onclick="intentarRegistrar()" class="w-full bg-[#6a1b9a] hover:bg-[#511078] text-white font-bold py-3 rounded-xl transition-all shadow-md active:scale-95">Crear Cuenta y Entrar</button>
+                <p class="text-xs text-gray-500 mt-4">
+                    ¿Ya tienes una cuenta? <span class="text-[#ff4081] underline cursor-pointer font-semibold" onclick="mostrarRegistro(false)">Volver al Ingreso</span>
+                </p>
             </div>
         </div>
+
+        <!-- 2. DASHBOARD PRINCIPAL (DESBLOQUEADO TRAS AUTH) -->
+        <div id="dashboard" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Bloque Izquierdo y Centro: Educación y Autocuidado -->
+            <div class="md:col-span-2 flex flex-col gap-6">
+                
+                <!-- Módulo de Educación Sexual Integral (ESI) -->
+                <div class="bg-white rounded-2xl p-6 shadow-md border border-purple-55 text-left">
+                    <div class="inline-block bg-[#f3e5f5] text-[#6a1b9a] text-xs font-bold px-3 py-1 rounded-full mb-4">
+                        Perfil Activo: <span id="tipo-perfil" class="font-extrabold">Cargando...</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-[#6a1b9a] mb-2">Módulo de Educación Sexual Integral</h3>
+                    
+                    <p class="text-xs text-gray-500 mb-4">
+                        <b>Enfoque pedagógico:</b> <span id="perfil-enfoque" class="text-gray-700 font-medium">Cargando...</span>
+                    </p>
+
+                    <!-- Tarjetas de contenido inyectadas dinámicamente -->
+                    <div id="perfil-menu-bloques" class="space-y-3"></div>
+
+                    <!-- Cuadro de acompañamiento familiar -->
+                    <div id="bloque-acompanar" class="bg-orange-50 border-l-4 border-[#ff8a65] p-4 rounded-r-xl text-xs text-orange-950 mt-4 leading-relaxed"></div>
+                </div>
+
+                <!-- Módulo de Autocuidado -->
+                <div class="bg-white rounded-2xl p-6 shadow-md border border-purple-50 text-left">
+                    <h3 class="text-lg font-bold text-[#6a1b9a] mb-4">Mi Agenda de Autocuidado</h3>
+                    
+                    <!-- Formulario e Historial de Ciclo Menstrual (Para Selena, Aurora y Ema) -->
+                    <div class="bg-gray-50 border border-purple-100 p-4 rounded-xl flex flex-col gap-4 mb-4">
+                        <div class="flex items-start space-x-3">
+                            <div>
+                                <h4 class="font-semibold text-xs text-[#6a1b9a]">Ciclo Menstrual</h4>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Calcula y guarda la duración de tus ciclos de manera confidencial y local.</p>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de Registro -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-purple-50 shadow-sm">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1" for="ciclo-inicio">Fecha de Inicio:</label>
+                                <input type="date" id="ciclo-inicio" class="w-full p-2 border text-xs rounded-lg focus:outline-none focus:border-[#6a1b9a]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-600 mb-1" for="ciclo-termino">Fecha de Término:</label>
+                                <input type="date" id="ciclo-termino" class="w-full p-2 border text-xs rounded-lg focus:outline-none focus:border-[#6a1b9a]">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <button onclick="registrarCicloMenstrual()" class="w-full bg-[#6a1b9a] hover:bg-purple-800 text-white text-xs font-bold py-2 rounded-lg transition-all">Guardar Ciclo Menstrual</button>
+                                <div id="ciclo-error" class="hidden text-red-500 text-[10px] mt-1 font-medium"></div>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Ciclos -->
+                        <div class="mt-2">
+                            <h5 class="text-xs font-bold text-gray-600 mb-2">Historial de Registros</h5>
+                            <div id="ciclos-lista" class="space-y-1.5 max-h-36 overflow-y-auto">
+                                <p class="text-[11px] text-gray-400 italic">No hay ciclos ginecológicos ingresados aún.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Módulo de Citas Médicas Condicional (Para mayores de 13 años: Aurora, Ema) -->
+                    <div id="modulo-citas-medicas" class="hidden bg-pink-50/50 border border-pink-100 p-4 rounded-xl flex flex-col gap-4">
+                        <div class="flex items-start space-x-3">
+                            <div>
+                                <h4 class="font-semibold text-xs text-pink-700">Agenda Médica Preventiva (CESFAM)</h4>
+                                <p class="text-[11px] text-gray-500 mt-0.5">Control preventivo, consejería y seguimiento ginecológico en tu centro de salud local.</p>
+                            </div>
+                        </div>
+
+                        <!-- Formulario de Registro de Citas -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3 rounded-xl border border-pink-100 shadow-sm">
+                            <div>
+                                <label class="block text-[10px] font-bold text-pink-700 mb-1" for="cita-fecha">Fecha de Cita:</label>
+                                <input type="date" id="cita-fecha" class="w-full p-2 border text-xs rounded-lg focus:outline-none focus:border-pink-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-pink-700 mb-1" for="cita-motivo">Especialidad / Centro:</label>
+                                <input type="text" id="cita-motivo" placeholder="Ej: Control Matrona - CESFAM" class="w-full p-2 border text-xs rounded-lg focus:outline-none focus:border-pink-500">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <button onclick="registrarCitaMedica()" class="w-full bg-pink-600 hover:bg-pink-700 text-white text-xs font-bold py-2 rounded-lg transition-all">Agendar Nueva Cita</button>
+                                <div id="cita-error" class="hidden text-red-500 text-[10px] mt-1 font-medium"></div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Citas -->
+                        <div class="mt-2">
+                            <h5 class="text-xs font-bold text-pink-800 mb-2">Próximas Citas Agendadas</h5>
+                            <div id="citas-lista" class="space-y-1.5 max-h-36 overflow-y-auto">
+                                <p class="text-[11px] text-gray-400 italic">No hay citas agendadas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bloque Derecho: Botón de Pánico Crítico y Soporte Territorial -->
+            <div class="flex flex-col gap-6">
+                
+                <!-- Botón de Pánico -->
+                <div class="bg-white rounded-2xl p-6 shadow-md border border-purple-50 text-center flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-red-600 m-0">Módulo de Emergencia</h3>
+                    <p class="text-xs text-gray-500 m-0 leading-relaxed">Ante cualquier situación de acoso, sospecha o violencia, presiona este botón para notificar de inmediato con tu ubicación a tus contactos.</p>
+                    
+                    <button class="btn-sos text-white text-base font-bold py-4 rounded-xl active:scale-95 transition-all" onclick="dispararSOS()">🚨 BOTÓN DE PÁNICO</button>
+                    
+                    <div id="sos-success-msg" class="hidden bg-emerald-50 border-l-4 border-emerald-500 p-3 rounded-r-xl text-left text-[11px] text-emerald-950"></div>
+                </div>
+
+                <!-- Ayuda Territorial Chile -->
+                <div class="bg-white rounded-2xl p-6 shadow-md border border-purple-50 text-left">
+                    <h4 class="text-[#6a1b9a] font-bold text-sm mb-3">🇨🇱 Orientación Territorial</h4>
+                    <p id="bloque-chile-texto" class="text-xs text-gray-600 leading-relaxed"></p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 3. MONITOR DE AUDITORÍA VISUAL (LOGS HTTP) -->
+        <div class="bg-white rounded-2xl p-4 shadow-md border border-purple-100">
+            <h4 class="text-xs font-bold text-gray-500 mb-3 text-left flex justify-between items-center">
+                <span>📟 Monitor de Auditoría de Llamadas (HTTP Logs)</span>
+                <span id="badge-modo" class="bg-blue-100 text-blue-800 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Evaluando canal...</span>
+            </h4>
+            <div id="console-logs" class="console-box h-32 rounded-xl p-3 text-[10px] text-left overflow-y-auto space-y-1.5">
+                <div class="console-entry console-info">[Sistema] Consola de logs iniciada de manera segura.</div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        let usuarioActual = "";
-        let edadActual = 0;
+        // --- BASE DE DATOS LOCAL PARA MODO OFFLINE / SANDBOX ---
+        const usuariosDBLocal = {
+            "selena": { nombre: "Selena", edad: 11 },
+            "aurora": { nombre: "Aurora", edad: 15 },
+            "ema": { nombre: "Ema", edad: 22 }
+        };
 
-        const usuarios = { "Selena": 10, "Aurora": 15, "Ema": 22 };
+        // Simulación de base de datos en memoria local para ciclos y citas por usuario (Sandbox)
+        const ciclosSandbox = {};
+        const citasSandbox = {};
 
-        function registrarLog(mensaje, status) {
-            const consoleBox = document.getElementById('log-console');
-            const hora = new Date().toLocaleTimeString();
-            
-            if (consoleBox.innerText.includes("Esperando acciones")) {
-                consoleBox.innerHTML = "";
+        class PerfilFactoryLocal {
+            static crearPerfil(edad) {
+                if (edad >= 10 && edad <= 13) return new PerfilInfantilLocal();
+                if (edad >= 14 && edad <= 18) return new PerfilAdolescenteLocal();
+                return new PerfilAdultoLocal();
             }
-            
-            const nuevoLog = `<div>[${hora}] <span style="color: #ff9f43;">[HTTP ${status}]</span> ${mensaje}</div>`;
-            consoleBox.innerHTML += nuevoLog;
-            consoleBox.scrollTop = consoleBox.scrollHeight;
         }
 
-        function verificarOIngresar() {
-            usuarioActual = document.getElementById('nombre').value.trim();
-            if(!usuarioActual) return alert("Por favor ingresa un nombre");
+        // Estructuras para Decorator & Observer Local
+        class SubjectLocal {
+            constructor() { this.observers = []; }
+            subscribe(observer) { this.observers.push(observer); }
+            notify(data) { this.observers.forEach(o => o.update(data)); }
+            getListaNombres() { return this.observers.map(o => o.nombre); }
+        }
 
-            if (usuarios[usuarioActual]) {
-                edadActual = usuarios[usuarioActual];
-                cargarAplicacion();
-                registrarLog(`Sesión iniciada. Usuario: ${usuarioActual}.`, 200);
+        class ContactoObserverLocal {
+            constructor(nombre) { this.nombre = nombre; }
+            update(data) {
+                console.log(`[Observer Simulador] SMS despachado a ${this.nombre}: ${data.mensaje}`);
+            }
+        }
+
+        function decorarAlertaLocal(alerta) {
+            alerta.severidad = "CRÍTICA";
+            alerta.mensaje = `[${alerta.severidad}] ` + alerta.mensaje;
+            alerta.timestamp = new Date().toLocaleTimeString();
+            alerta.esAutenticada = true;
+            return alerta;
+        }
+
+        // Instancia global de Observadores Locales
+        const mockPanicoSubject = new SubjectLocal();
+        mockPanicoSubject.subscribe(new ContactoObserverLocal("Mamá (Contacto SOS)"));
+        mockPanicoSubject.subscribe(new ContactoObserverLocal("Papá (Contacto SOS)"));
+
+        // --- SISTEMA DE LOGS INTERACTIVO ---
+        function registrarLog(mensaje, codigoStatus = 200, tipo = 'success') {
+            const consola = document.getElementById('console-logs');
+            const ahora = new Date().toLocaleTimeString();
+            
+            let claseCss = 'console-success';
+            if (codigoStatus >= 400) claseCss = 'console-err';
+            else if (tipo === 'info') claseCss = 'console-info';
+            else if (tipo === 'warning') claseCss = 'console-warning';
+
+            const logEntry = document.createElement('div');
+            logEntry.className = `console-entry ${claseCss}`;
+            logEntry.innerHTML = `[${ahora}] [HTTP ${codigoStatus}] ${mensaje}`;
+            
+            consola.appendChild(logEntry);
+            consola.scrollTop = consola.scrollHeight;
+        }
+
+        // --- DETECTOR DINÁMICO DE CANAL (REAL VS SANDBOX) ---
+        let backendDisponible = null;
+        let usuarioSesion = null;
+
+        async function chequearDisponibilidadBackend() {
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: 'ema' })
+                });
+                backendDisponible = true;
+                document.getElementById('badge-modo').innerText = "ONLINE (NodeJS Backend)";
+                document.getElementById('badge-modo').className = "bg-green-100 text-green-800 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase";
+                registrarLog("Servidor Express detectado. Conexión establecida de forma segura.", 200, 'info');
+            } catch (err) {
+                backendDisponible = false;
+                document.getElementById('badge-modo').innerText = "SANDBOX OFFLINE MODE";
+                document.getElementById('badge-modo').className = "bg-amber-100 text-amber-800 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase";
+                registrarLog("Express Offline. Iniciando simulación local de patrones (Fábrica, Observador, Decorador).", 200, 'warning');
+            }
+        }
+
+        // Inicializar verificación
+        chequearDisponibilidadBackend();
+
+        // --- LOGICA DE FORMULARIOS ---
+        function mostrarRegistro(quieroRegistrar) {
+            document.getElementById('login-error-msg').classList.add('hidden');
+            document.getElementById('reg-error-msg').classList.add('hidden');
+
+            if (quieroRegistrar) {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('auth-title').innerText = "Crear Cuenta Nueva";
+                document.getElementById('auth-subtitle').innerText = "Regístrate con tu nombre y fecha de nacimiento.";
             } else {
-                const registroBox = document.getElementById('registro-edad-box');
-                if (registroBox.style.display === 'none') {
-                    registroBox.style.display = 'block';
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('auth-title').innerText = "Ingresar a Aura";
+                document.getElementById('auth-subtitle').innerText = "Escribe tu nombre para iniciar tu sesión segura local.";
+            }
+        }
+
+        function calcularEdadLocal(fechaNacimiento) {
+            const hoy = new Date();
+            const cumpleanos = new Date(fechaNacimiento);
+            let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+            const diferenciaMeses = hoy.getMonth() - cumpleanos.getMonth();
+            if (diferenciaMeses < 0 || (diferenciaMeses === 0 && hoy.getDate() < cumpleanos.getDate())) {
+                edad--;
+            }
+            return edad;
+        }
+
+        // Paso 1: Login
+        async function intentarIngresar() {
+            const nombreInput = document.getElementById('login-nombre').value;
+            const errorDiv = document.getElementById('login-error-msg');
+            errorDiv.classList.add('hidden');
+
+            if (!nombreInput) {
+                errorDiv.innerText = "Por favor ingresa un nombre.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            const nombreLimpio = nombreInput.trim();
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre: nombreLimpio })
+                    });
+                    const data = await res.json();
+                    registrarLog(`Solicitud de login para: "${nombreLimpio}"`, res.status);
+
+                    if (res.ok) {
+                        usuarioSesion = data;
+                        cargarDashboard();
+                    } else {
+                        errorDiv.innerText = data.error;
+                        errorDiv.classList.remove('hidden');
+                    }
+                } catch (err) {
+                    registrarLog("Error crítico de red durante la autenticación.", 500);
+                }
+            } else {
+                const key = nombreLimpio.toLowerCase();
+                const usuario = usuariosDBLocal[key];
+                registrarLog(`[Simulación] Solicitud de login para: "${nombreLimpio}"`, 200, 'info');
+
+                if (usuario) {
+                    usuarioSesion = { nombre: usuario.nombre, edad: usuario.edad };
+                    cargarDashboard();
                 } else {
-                    const edadIngresada = parseInt(document.getElementById('edad-registro').value);
-                    if (!edadIngresada || edadIngresada < 10) return alert("Ingresa una edad válida (Mínimo 10 años)");
-                    usuarios[usuarioActual] = edadIngresada;
-                    edadActual = edadIngresada;
-                    cargarAplicacion();
-                    registrarLog(`Usuario nuevo creado en el sistema: ${usuarioActual} (${edadActual} años).`, 201);
+                    errorDiv.innerText = "Usuario no registrado. ¿Deseas registrarte?";
+                    errorDiv.classList.remove('hidden');
                 }
             }
         }
 
-        async function cargarAplicacion() {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
-            document.getElementById('saludo').innerText = `¡Hola, ${usuarioActual}!`;
-            document.getElementById('edad-actual').innerText = edadActual;
+        // Paso 2: Registro
+        async function intentarRegistrar() {
+            const nombreInput = document.getElementById('reg-nombre').value;
+            const fechaNacimiento = document.getElementById('reg-nacimiento').value;
+            const errorDiv = document.getElementById('reg-error-msg');
+            errorDiv.classList.add('hidden');
 
-            await consultarConsejos();
-
-            if (edadActual >= 14) {
-                document.getElementById('cita-section').style.display = 'block';
-            } else {
-                document.getElementById('cita-section').style.display = 'none';
+            if (!nombreInput || !fechaNacimiento) {
+                errorDiv.innerText = "Por favor completa todos los campos.";
+                errorDiv.classList.remove('hidden');
+                return;
             }
-            
-            const hist = await fetch(`/api/historial/${usuarioActual}`);
-            registrarLog(`Historial de datos recuperado de la memoria local.`, hist.status);
-            renderizarHistorial(await hist.json());
 
-            await obtenerContactos();
+            const nombreLimpio = nombreInput.trim();
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/registro', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nombre: nombreLimpio, fechaNacimiento })
+                    });
+                    const data = await res.json();
+                    registrarLog(`Petición de registro: "${nombreLimpio}"`, res.status);
+
+                    if (res.ok) {
+                        usuarioSesion = data;
+                        cargarDashboard();
+                    } else {
+                        errorDiv.innerText = data.error;
+                        errorDiv.classList.remove('hidden');
+                    }
+                } catch (err) {
+                    registrarLog("Error crítico al procesar endpoint de registro.", 500);
+                }
+            } else {
+                const edadCalculada = calcularEdadLocal(fechaNacimiento);
+                registrarLog(`[Simulación] Petición de registro: "${nombreLimpio}" | F.Nac: ${fechaNacimiento} (Calculado: ${edadCalculada} años)`, 201, 'info');
+
+                if (edadCalculada < 10) {
+                    errorDiv.innerText = `La usuaria tiene ${edadCalculada} años. Aura está diseñado de forma responsable para usuarias desde los 10 años.`;
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+
+                const key = nombreLimpio.toLowerCase();
+                usuariosDBLocal[key] = {
+                    nombre: nombreLimpio,
+                    edad: edadCalculada
+                };
+
+                usuarioSesion = { nombre: nombreLimpio, edad: edadCalculada };
+                cargarDashboard();
+            }
         }
 
-        async function actualizarEdad() {
-            const nuevaEdad = parseInt(document.getElementById('nueva-edad').value);
-            if (!nuevaEdad || nuevaEdad < 10) return alert("Ingresa una edad válida");
+        // Paso 3: Renderizado Dinámico (Factory Method)
+        async function cargarDashboard() {
+            // Garantizar la limpieza de residuos visuales de la sesión anterior (Evita persistencia del SOS)
+            document.getElementById('sos-success-msg').classList.add('hidden');
+            document.getElementById('sos-success-msg').innerHTML = '';
             
-            usuarios[usuarioActual] = nuevaEdad;
-            edadActual = nuevaEdad;
-            document.getElementById('nueva-edad').value = "";
-            alert("Perfil de usuario actualizado con éxito.");
-            registrarLog(`Edad modificada. Re-evaluando perfil a: ${edadActual} años.`, 200);
-            await cargarAplicacion();
+            document.getElementById('auth-card').classList.add('hidden');
+            document.getElementById('session-info').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+
+            document.getElementById('user-display').innerText = `Hola, ${usuarioSesion.nombre} (${usuarioSesion.edad} años)`;
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/perfil/${usuarioSesion.edad}`);
+                    registrarLog(`Consumo de perfil vía Factory Pattern para edad: ${usuarioSesion.edad}`, res.status);
+                    const data = await res.json();
+                    renderizarPerfilUI(data);
+                } catch (err) {
+                    registrarLog("Error al recuperar los datos educativos del servidor.", 500);
+                }
+            } else {
+                registrarLog(`[Simulación] Evaluando tramo por edad con Factory Method local para: ${usuarioSesion.edad} años`, 200, 'info');
+                const perfil = PerfilFactoryLocal.crearPerfil(usuarioSesion.edad);
+                const dataSimulada = {
+                    perfil_tipo: perfil.constructor.name.replace('PerfilLocal', ''),
+                    contenido: perfil.getContenido()
+                };
+                renderizarPerfilUI(dataSimulada);
+            }
+
+            // Cargar datos transaccionales del ciclo y las citas
+            actualizarListaCiclos();
+            actualizarListaCitas();
         }
 
-        async function consultarConsejos() {
-            const res = await fetch(`/api/perfil/${edadActual}`);
-            registrarLog(`API solicitada para mapear contenido educativo vía Factoría.`, res.status);
-            const data = await res.json();
-            
+        function renderizarPerfilUI(data) {
             document.getElementById('tipo-perfil').innerText = data.perfil_tipo;
             document.getElementById('perfil-enfoque').innerText = data.contenido.enfoque;
-            
+
+            // Renderizar temarios
             const menuHtml = data.contenido.menu.map(item => `
-                <div style="background: #fff; border: 1px solid #e0e0e0; padding: 10px; border-radius: 8px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <h4 style="margin: 0 0 5px 0; color: var(--primary); font-size: 0.95em;">📌 ${item.titulo}</h4>
-                    <p style="margin: 0; font-size: 0.85em; color: #444;">${item.detalle}</p>
+                <div class="bg-gray-50 border border-purple-100 p-3 rounded-xl shadow-sm">
+                    <h4 class="font-bold text-xs text-[#6a1b9a]">📌 ${item.titulo}</h4>
+                    <p class="text-[11px] text-gray-600 mt-1 leading-relaxed">${item.detalle}</p>
                 </div>
             `).join('');
             document.getElementById('perfil-menu-bloques').innerHTML = menuHtml;
-            
+
+            // Consejos de acompañamiento
             document.getElementById('bloque-acompanar').innerHTML = `
-                <b>¿Cómo acompañar sin invadir?:</b> ${data.contenido.acompanamiento} 
-                <br><small style="color:#777;">Hablar de sexualidad de manera progresiva construye un cuidado seguro del cuerpo.</small>
+                <strong>Acompañar sin invadir:</strong> ${data.contenido.acompanamiento}
             `;
-            
-            document.getElementById('bloque-chile').innerHTML = `
-                <h4>🇨🇱 Orientación y Apoyo Regional</h4>
-                <p style="margin:5px 0;">${data.contenido.soporte}</p>
-                <span style="font-size:0.9em; color:#d9381e;"><b>Cuándo consultar:</b> Sospecha de ITS, dolores, violencia, presión o dudas sobre anticonceptivos (incluida la píldora del día después en CESFAM/Espacios Amigables).</span>
+
+            // Ayuda territorial con "Cuándo consultar" adaptativo
+            document.getElementById('bloque-chile-texto').innerHTML = `
+                <p class="text-xs text-gray-700 leading-relaxed font-semibold">
+                    ${data.contenido.soporte}
+                </p>
+                <div class="mt-3 pt-3 border-t border-purple-50">
+                    <span class="text-rose-600 font-bold text-xs">📍 Cuándo consultar:</span> 
+                    <span class="text-xs text-gray-600 block mt-1 leading-relaxed">${data.contenido.cuandoConsultar}</span>
+                </div>
             `;
-        }
 
-        async function agregarContacto() {
-            const nombreContacto = document.getElementById('nuevo-contacto').value.trim();
-            if(!nombreContacto) return alert("Escribe el nombre del contacto");
-
-            const res = await fetch('/api/contactos', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ nombre: nombreContacto })
-            });
-            
-            registrarLog(`Contacto añadido con éxito al Subject del Observer: "${nombreContacto}".`, res.status);
-            document.getElementById('nuevo-contacto').value = "";
-            await obtenerContactos();
-        }
-
-        async function obtenerContactos() {
-            const res = await fetch('/api/contactos');
-            const contactos = await res.json();
-            document.getElementById('lista-contactos').innerHTML = contactos.map(c => `<li>${c}</li>`).join('');
-        }
-
-        async function registrarDato(tipo, accion = 'registrar', index = null) {
-            const body = { usuario: usuarioActual, tipo, accion, index,
-                inicio: document.getElementById('inicio-ciclo').value,
-                fin: document.getElementById('fin-ciclo').value,
-                fecha: document.getElementById('fecha-cita').value 
-            };
-            const res = await fetch('/api/datos', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-            
-            if (accion === 'eliminar') {
-                registrarLog(`Registro eliminado correctamente del bloque [${tipo}].`, res.status);
+            // Condicional de Negocio: Agenda Médica para mayores de 13 años
+            const moduloCitas = document.getElementById('modulo-citas-medicas');
+            if (usuarioSesion.edad >= 14) {
+                moduloCitas.classList.remove('hidden');
             } else {
-                registrarLog(`Información de salud enviada con éxito al módulo [${tipo}].`, res.status);
+                moduloCitas.classList.add('hidden');
             }
-            
-            renderizarHistorial((await res.json()).historial);
         }
 
-        function renderizarHistorial(h) {
-            document.getElementById('lista-ciclos').innerHTML = h.ciclos.map((c, i) => 
-                `<li>${c.inicio} al ${c.fin} (<b>${c.duracion} días</b>) 
-                <button onclick="registrarDato('ciclo', 'eliminar', ${i})" style="padding:2px 8px; font-size:0.8em; width:auto; margin:0 0 0 10px; background:#ff4757;">X</button></li>`).join('');
+        // --- GESTIÓN INTERACTIVA DE CICLOS MENSTRUALES ---
+        async function registrarCicloMenstrual() {
+            const inicioVal = document.getElementById('ciclo-inicio').value;
+            const terminoVal = document.getElementById('ciclo-termino').value;
+            const errorDiv = document.getElementById('ciclo-error');
+            errorDiv.classList.add('hidden');
 
-            document.getElementById('lista-citas').innerHTML = h.citas.map((c, i) => 
-                `<li>Cita: ${c.fecha} 
-                <button onclick="registrarDato('cita', 'eliminar', ${i})" style="padding:2px 8px; font-size:0.8em; width:auto; margin:0 0 0 10px; background:#ff4757;">X</button></li>`).join('');
+            if (!inicioVal || !terminoVal) {
+                errorDiv.innerText = "Por favor ingresa ambas fechas.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Regla de Negocio (RB-09): Fecha de término no puede ser anterior a la de inicio
+            if (new Date(terminoVal) < new Date(inicioVal)) {
+                errorDiv.innerText = "La fecha de término no puede ser anterior a la fecha de inicio.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/ciclo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            usuario: usuarioSesion.nombre,
+                            fechaInicio: inicioVal,
+                            fechaTermino: terminoVal
+                        })
+                    });
+                    registrarLog(`Ciclo menstrual guardado para: ${usuarioSesion.nombre}`, res.status);
+                    actualizarListaCiclos();
+                } catch (err) {
+                    registrarLog("Error al comunicarse con el servidor para registrar el ciclo.", 500);
+                }
+            } else {
+                // Flujo Sandbox Local (Aislado por usuario)
+                const key = usuarioSesion.nombre.toLowerCase();
+                if (!ciclosSandbox[key]) ciclosSandbox[key] = [];
+                
+                const fechaInicio = new Date(inicioVal);
+                const fechaTermino = new Date(terminoVal);
+                const duracion = Math.round((fechaTermino - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+
+                ciclosSandbox[key].push({
+                    fechaInicio: inicioVal,
+                    fechaTermino: terminoVal,
+                    duracion
+                });
+
+                registrarLog(`[Sandbox] Registro de ciclo guardado localmente (${duracion} días de duración).`, 201);
+                actualizarListaCiclos();
+            }
+
+            // Limpieza de inputs
+            document.getElementById('ciclo-inicio').value = '';
+            document.getElementById('ciclo-termino').value = '';
         }
 
-        async function alertaPanico() {
-            const res = await fetch('/api/panico');
-            const respuestaTexto = await res.text(); 
-            const mensajeEspejo = "[CRÍTICA] ¡Emergencia detectada! Necesito ayuda. | Ubicación: -20.21, -70.14";
-            
-            registrarLog(mensajeEspejo, res.status);
-            
-            document.getElementById('coordenadas').innerText = "Alerta crítica distribuida.";
+        async function actualizarListaCiclos() {
+            const listContainer = document.getElementById('ciclos-lista');
+            listContainer.innerHTML = '';
+
+            let ciclos = [];
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/ciclos/${usuarioSesion.nombre}`);
+                    if (res.ok) ciclos = await res.json();
+                } catch (e) {
+                    registrarLog("Error al recuperar ciclos del servidor.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                ciclos = ciclosSandbox[key] || [];
+            }
+
+            if (ciclos.length === 0) {
+                listContainer.innerHTML = `<p class="text-[11px] text-gray-400 italic">No hay ciclos ginecológicos ingresados aún.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = ciclos.map((c, i) => `
+                <div class="bg-white p-2.5 rounded-lg border border-purple-50 flex justify-between items-center text-[11px] shadow-sm">
+                    <div>
+                        <span class="font-semibold text-[#6a1b9a]">Ciclo #${i + 1}</span> 
+                        <span class="text-gray-500 ml-2">${c.fechaInicio} al ${c.fechaTermino}</span>
+                    </div>
+                    <span class="bg-purple-100 text-[#6a1b9a] font-bold px-2 py-0.5 rounded">${c.duracion} días</span>
+                </div>
+            `).join('');
         }
 
+        // --- GESTIÓN INTERACTIVA DE CITAS MÉDICAS ---
+        async function registrarCitaMedica() {
+            const fechaVal = document.getElementById('cita-fecha').value;
+            const motivoVal = document.getElementById('cita-motivo').value;
+            const errorDiv = document.getElementById('cita-error');
+            errorDiv.classList.add('hidden');
+
+            if (!fechaVal || !motivoVal) {
+                errorDiv.innerText = "Por favor completa la fecha y el motivo/centro.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/cita', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            usuario: usuarioSesion.nombre,
+                            fecha: fechaVal,
+                            motivo: motivoVal
+                        })
+                    });
+                    registrarLog(`Cita médica agendada para: ${usuarioSesion.nombre}`, res.status);
+                    actualizarListaCitas();
+                } catch (err) {
+                    registrarLog("Error de conexión al agendar cita médica.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                if (!citasSandbox[key]) citasSandbox[key] = [];
+
+                citasSandbox[key].push({
+                    fecha: fechaVal,
+                    motivo: motivoVal
+                });
+
+                registrarLog(`[Sandbox] Cita médica para "${motivoVal}" agendada de forma local.`, 201);
+                actualizarListaCitas();
+            }
+
+            document.getElementById('cita-fecha').value = '';
+            document.getElementById('cita-motivo').value = '';
+        }
+
+        async function eliminarCitaMedica(index) {
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/cita/${usuarioSesion.nombre}/${index}`, {
+                        method: 'DELETE'
+                    });
+                    registrarLog(`Cita médica removida de la agenda`, res.status);
+                    actualizarListaCitas();
+                } catch (e) {
+                    registrarLog("Error al eliminar la cita médica en el servidor.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                if (citasSandbox[key]) {
+                    citasSandbox[key].splice(index, 1);
+                    registrarLog(`[Sandbox] Cita médica removida de la agenda local.`, 200);
+                    actualizarListaCitas();
+                }
+            }
+        }
+
+        async function actualizarListaCitas() {
+            const listContainer = document.getElementById('citas-lista');
+            listContainer.innerHTML = '';
+
+            let citas = [];
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/citas/${usuarioSesion.nombre}`);
+                    if (res.ok) citas = await res.json();
+                } catch (e) {
+                    registrarLog("Error al recuperar la agenda de citas.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                citas = citasSandbox[key] || [];
+            }
+
+            if (citas.length === 0) {
+                listContainer.innerHTML = `<p class="text-[11px] text-gray-400 italic">No hay citas agendadas.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = citas.map((c, i) => `
+                <div class="bg-white p-2.5 rounded-lg border border-pink-100 flex justify-between items-center text-[11px] shadow-sm">
+                    <div>
+                        <span class="font-semibold text-pink-700"> ${c.fecha}</span> 
+                        <span class="text-gray-600 ml-2 font-medium">${c.motivo}</span>
+                    </div>
+                    <button onclick="eliminarCitaMedica(${i})" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">Eliminar</button>
+                </div>
+            `).join('');
+        }
+
+        // Paso 4: Botón de Pánico SOS (Decorator + Observer)
+        async function dispararSOS() {
+            const alertDiv = document.getElementById('sos-success-msg');
+            alertDiv.classList.add('hidden');
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/panico');
+                    const data = await res.json();
+                    
+                    registrarLog(`[DECORATOR] Alerta formateada por backend: ${data.alerta.mensaje} (${data.alerta.ubicacion})`, res.status);
+                    
+                    alertDiv.innerHTML = `
+                        <strong>¡Alerta de Auxilio Enviada con Éxito!</strong><br>
+                        <strong>SMS Decorado:</strong> ${data.alerta.mensaje}<br>
+                        <strong>Coordenadas:</strong> ${data.alerta.ubicacion}<br>
+                        <strong>Contactos Alertados (Observer):</strong> ${data.contactosNotificados.join(', ')}<br>
+                        <small class="text-gray-500 font-medium mt-1 block">Tiempos de respuesta síncronos garantizados &lt; 2 seg (RNF-02).</small>
+                    `;
+                    alertDiv.classList.remove('hidden');
+                } catch (err) {
+                    registrarLog("Error al disparar alerta crítica hacia la API.", 500);
+                }
+            } else {
+                // Canal Simulación (Sandbox)
+                registrarLog("[Simulación SOS] Enviando alerta decorada localmente...", 200, 'warning');
+                
+                const alertaBase = {
+                    mensaje: "¡Emergencia detectada! Necesito ayuda urgente.",
+                    ubicacion: "-20.21, -70.14"
+                };
+
+                const alertaDecorada = decorarAlertaLocal(alertaBase);
+                registrarLog(`[DECORATOR] Alerta decorada localmente: ${alertaDecorada.mensaje}`, 200, 'info');
+
+                alertDiv.innerHTML = `
+                        <strong>¡Alerta de Auxilio Enviada con Éxito! (Modo Sandbox)</strong><br>
+                        <strong>SMS Decorado:</strong> ${alertaDecorada.mensaje}<br>
+                        <strong>Coordenadas:</strong> ${alertaDecorada.ubicacion}<br>
+                        <strong>Contactos Alertados (Observer):</strong> ${mockPanicoSubject.getListaNombres().join(', ')}<br>
+                        <small class="text-orange-600 font-medium mt-1 block">Simulación de tiempos de respuesta inmediata síncrona menor a 0.05 segundos (RNF-02).</small>
+                    `;
+                alertDiv.classList.remove('hidden');
+            }
+        }
+
+        function cerrarSesion() {
+            usuarioSesion = null;
+            document.getElementById('login-nombre').value = '';
+            document.getElementById('reg-nombre').value = '';
+            document.getElementById('reg-nacimiento').value = '';
+            
+            // Ocultar paneles y resetear inputs
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('session-info').classList.add('hidden');
+            document.getElementById('auth-card').classList.remove('hidden');
+            
+            // Resetear contenedores transaccionales e historiales para que queden totalmente limpios
+            document.getElementById('sos-success-msg').classList.add('hidden');
+            document.getElementById('sos-success-msg').innerHTML = '';
+            document.getElementById('ciclos-lista').innerHTML = '';
+            document.getElementById('citas-lista').innerHTML = '';
+
+            mostrarRegistro(false);
+            registrarLog("Sesión cerrada correctamente de forma local. Estado limpio y seguro.", 200);
+        }
     </script>
 </body>
 </html>

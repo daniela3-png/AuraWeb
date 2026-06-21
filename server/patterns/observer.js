@@ -1,37 +1,40 @@
+// Sujeto (Subject) que mantiene la lista de observadores y propaga las alertas
 class Subject {
     constructor() {
         this.observers = [];
     }
-    
+
+    // Suscribir un nuevo contacto de emergencia
     subscribe(observer) {
         this.observers.push(observer);
     }
-    
+
+    // Notificar a todos los observadores registrados con la información de la alerta
     notify(data) {
         this.observers.forEach(observer => observer.update(data));
     }
 
-    // Nueva función para obtener los nombres de los contactos configurados
+    // Recuperar la lista de nombres para auditoría y visualización
     getListaNombres() {
         return this.observers.map(o => o.nombre);
     }
 }
 
+// Observador concreto que representa a los contactos de emergencia
 class ContactoObserver {
     constructor(nombre) {
         this.nombre = nombre;
     }
-    
+
+    // Método que se activa síncronamente al recibir la alerta
     update(data) {
-        console.log(` [SMS Enviado a ${this.nombre}]: ${data.mensaje} | Ubicación: ${data.ubicacion}`);
+        // En un entorno de producción móvil real, aquí se llamaría al SDK de SMS o Push Notification
+        console.log(`[SMS Enviado a ${this.nombre}]: ${data.mensaje} | Ubicación: ${data.ubicacion}`);
     }
 }
 
-const panicoSubject = new Subject();
-
-// Contactos iniciales predefinidos por la regla de negocio (RB-02)
-panicoSubject.subscribe(new ContactoObserver("Mamá"));
-panicoSubject.subscribe(new ContactoObserver("Papá"));
-
-// Exportamos la clase ContactoObserver para poder instanciarla dinámicamente en el server
-module.exports = { panicoSubject, ContactoObserver };
+// Exportamos de forma explícita ambas clases como un objeto estructurado para Node.js
+module.exports = {
+    Subject,
+    ContactoObserver
+};
