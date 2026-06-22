@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura - Mi Espacio de Bienestar</title>
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Encabezado de la Aplicación -->
+    <header>
+        <h1>
+            <!-- Logo SVG de Aura (Flor lineal) -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" />
+                <path d="M12 6C12 6 9.5 9.5 9.5 12C9.5 14.5 12 18 12 18C12 18 14.5 14.5 14.5 12C14.5 9.5 12 6 12 6Z" />
+            </svg>
+            <span>Aura Health</span>
+        </h1>
+        <div id="session-info" class="session-info">
+            <span class="user-display" id="user-display">Cargando...</span> 
+            <button onclick="cerrarSesion()" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <main class="app-container">
+
+        <!-- DASHBOARD PRINCIPAL -->
+        <div id="dashboard" class="dashboard-grid">
+            
+            <!-- Bloque Izquierdo y Centro: Educación y Autocuidado -->
+            <section class="dashboard-left">
+                
+                <!-- Módulo de Educación Sexual Integral (ESI) -->
+                <article class="card">
+                    <div class="profile-badge-container">
+                        <div class="profile-badge">
+                            Perfil Activo: <span id="tipo-perfil">Cargando...</span>
+                        </div>
+                    </div>
+                    <h3 class="card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                        </svg>
+                        <span>Módulos de Educación Sexual Integral</span>
+                    </h3>
+                    
+                    <p class="card-description">
+                        <strong>Enfoque pedagógico:</strong> <span id="perfil-enfoque">Cargando...</span>
+                    </p>
+
+                    <!-- Tarjetas de contenido inyectadas dinámicamente -->
+                    <div id="perfil-menu-bloques" class="edu-menu-grid"></div>
+
+                    <!-- Cuadro de acompañamiento familiar -->
+                    <div id="bloque-acompanar" class="caregiver-tip"></div>
+                </article>
+
+                <!-- Módulo de Autocuidado -->
+                <article class="card">
+                    <h3 class="card-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <span>Mi Agenda de Autocuidado</span>
+                    </h3>
+                    
+                    <!-- Formulario e Historial de Ciclo Menstrual -->
+                    <div class="tracker-sub-card">
+                        <div class="tracker-title-area">
+                            <h4 class="tracker-subtitle">Calendario del Ciclo Menstrual</h4>
+                            <p class="tracker-help">Registra y calcula de manera confidencial y segura la duración de tus ciclos.</p>
+                        </div>
+
+                        <!-- Formulario de Registro de Ciclo -->
+                        <div class="form-row">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-size: 0.7rem;" for="ciclo-inicio">Fecha de Inicio:</label>
+                                <input type="date" id="ciclo-inicio" class="form-input">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-size: 0.7rem;" for="ciclo-termino">Fecha de Término:</label>
+                                <input type="date" id="ciclo-termino" class="form-input">
+                            </div>
+                            <div class="form-row-btn">
+                                <button onclick="registrarCicloMenstrual()" class="btn-secondary">Guardar Ciclo Menstrual</button>
+                                <div id="ciclo-error" class="error-msg hidden" style="margin-top: 10px; margin-bottom: 0;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Historial de Ciclos -->
+                        <div>
+                            <h5 class="history-section-title">Historial de Registros</h5>
+                            <div id="ciclos-lista" class="history-scroll-container">
+                                <p class="history-empty">No hay ciclos ingresados todavía.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Módulo de Citas Médicas Condicional (Para mayores de 13 años) -->
+                    <div id="modulo-citas-medicas" class="tracker-sub-card teen-card hidden">
+                        <div class="tracker-title-area">
+                            <h4 class="tracker-subtitle teen-subtitle">Agenda Médica Preventiva (CESFAM)</h4>
+                            <p class="tracker-help">Agenda controles preventivos, consejería y seguimiento ginecológico.</p>
+                        </div>
+
+                        <!-- Formulario de Registro de Citas -->
+                        <div class="form-row teen-row">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-size: 0.7rem; color: var(--accent-dark);" for="cita-fecha">Fecha de Cita:</label>
+                                <input type="date" id="cita-fecha" class="form-input">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label" style="font-size: 0.7rem; color: var(--accent-dark);" for="cita-motivo">Especialidad / Centro:</label>
+                                <input type="text" id="cita-motivo" placeholder="Ej: Control Matrona - CESFAM" class="form-input">
+                            </div>
+                            <div class="form-row-btn">
+                                <button onclick="registrarCitaMedica()" class="btn-secondary btn-teen">Agendar Nueva Cita</button>
+                                <div id="cita-error" class="error-msg hidden" style="margin-top: 10px; margin-bottom: 0;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Citas -->
+                        <div>
+                            <h5 class="history-section-title" style="color: var(--accent-dark);">Próximas Citas Agendadas</h5>
+                            <div id="citas-lista" class="history-scroll-container">
+                                <p class="history-empty">No hay citas médicas agendadas.</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+            </section>
+
+            <!-- Bloque Derecho: Botón de Pánico Crítico y Soporte Territorial -->
+            <aside class="dashboard-right">
+                
+                <!-- Botón de Pánico -->
+                <article class="card sos-card">
+                    <h3 class="sos-title">Módulo de Emergencia</h3>
+                    <p class="card-description" style="margin-bottom: 12px;">
+                        Si te sientes incómoda, insegura o en peligro, presiona este botón para notificar de inmediato con tu ubicación a tus contactos de emergencia.
+                    </p>
+                    
+                    <button class="btn-sos-trigger" onclick="dispararSOS()">
+                        <!-- Icono de Campana Alerta SVG -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 22px; height: 22px;">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span>BOTÓN DE PÁNICO</span>
+                    </button>
+                    
+                    <div id="sos-success-msg" class="sos-status-alert hidden"></div>
+
+                    <!-- Líneas de ayuda directas -->
+                    <div class="sos-helplines" style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border-color); text-align: left; display: flex; flex-direction: column; gap: 8px;">
+                        <div style="font-size: 0.75rem; display: flex; justify-content: space-between; color: var(--text-main);">
+                            <span>📞 Violencia de Género:</span>
+                            <strong style="color: var(--accent-dark);">1455</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; display: flex; justify-content: space-between; color: var(--text-main);">
+                            <span>📞 Fono Familia Carabineros:</span>
+                            <strong style="color: var(--accent-dark);">149</strong>
+                        </div>
+                        <div style="font-size: 0.75rem; display: flex; justify-content: space-between; color: var(--text-main);">
+                            <span>📞 Salud Responde:</span>
+                            <strong style="color: var(--accent-dark);">600 360 7777</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Ayuda Territorial Chile -->
+                <article class="card territorial-card">
+                    <div class="territorial-header">
+                        <!-- Icono de Mapa Pin SVG -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <h4 class="territorial-title">Orientación Territorial</h4>
+                    </div>
+                    <div id="bloque-chile-texto" class="territorial-content"></div>
+                </article>
+
+            </aside>
+
+        </div>
+
+        <!-- MONITOR DE AUDITORÍA VISUAL (LOGS HTTP) -->
+        <section class="card audit-card">
+            <h4 class="audit-title">
+                <span>📟 Monitor de Auditoría de Llamadas (HTTP Logs)</span>
+                <span id="badge-modo" class="audit-badge sandbox">Evaluando canal...</span>
+            </h4>
+            <div id="console-logs" class="audit-console">
+                <div class="audit-entry info">[Sistema] Consola de logs iniciada de manera segura.</div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- VALIDACIÓN DE SESIÓN EN LA ENTRADA ---
+        let usuarioSesion = null;
+        const sessionRaw = sessionStorage.getItem('usuarioSesion');
+        if (!sessionRaw) {
+            window.location.href = 'index.html';
+        } else {
+            usuarioSesion = JSON.parse(sessionRaw);
+        }
+
+        // Simulación de base de datos en memoria local para ciclos y citas por usuario (Sandbox)
+        const ciclosSandbox = {};
+        const citasSandbox = {};
+
+        // Mapeador dinámico de iconos lineales amigables según el título del bloque ESI
+        function obtenerIconoSvg(titulo) {
+            const lower = titulo.toLowerCase();
+            if (lower.includes("pubertad")) {
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2C12 2 9 6 9 9C9 12.5 11 14 12 15C13 14 15 12.5 15 9C15 6 12 2 12 2Z"/><path d="M12 2C12 2 15 6 18 8C20 9.3 21 11.5 20 13C19 14.5 16.5 14 15 13"/><path d="M12 2C12 2 9 6 6 8C4 9.3 3 11.5 4 13C5 14.5 7.5 14 9 13"/><path d="M12 15V22"/></svg>`;
+            }
+            if (lower.includes("consentimiento")) {
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`;
+            }
+            if (lower.includes("internet") || lower.includes("prevención")) {
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+            }
+            if (lower.includes("trato") || lower.includes("vínculos") || lower.includes("relaciones")) {
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+            }
+            if (lower.includes("its") || lower.includes("controles") || lower.includes("salud")) {
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`;
+            }
+            if (lower.includes("planificación") || lower.includes("derechos")) {
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1M20 3v19M6.5 5H20M6.5 9H20"/></svg>`;
+            }
+            return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+        }
+
+        class PerfilFactoryLocal {
+            static crearPerfil(edad) {
+                if (edad >= 10 && edad <= 13) return new PerfilInfantilLocal();
+                if (edad >= 14 && edad <= 18) return new PerfilAdolescenteLocal();
+                return new PerfilAdultoLocal();
+            }
+        }
+
+        class PerfilInfantilLocal {
+            getContenido() {
+                return {
+                    enfoque: "Integral: Enfocado en el conocimiento del cuerpo, límites, emociones y vínculos seguros. Gradual según desarrollo.",
+                    menu: [
+                        { titulo: "Pubertad", detalle: "Menstruación, cambios corporales, higiene biológica y emociones." },
+                        { titulo: "Consentimiento Básico", detalle: "Nadie debe tocar tu cuerpo sin permiso; aprender a decir 'no' y pedir ayuda al adulto de confianza." },
+                        { titulo: "Internet y Autocuidado", detalle: "Privacidad digital, imágenes íntimas y cómo reaccionar ante situaciones incómodas." },
+                        { titulo: "Buen Trato", detalle: "Distinguir afecto, presión, manipulación y violencia." }
+                    ],
+                    acompanamiento: "Ruta para Cuidadores: Escuchar sin burlas, responder con lenguaje simple y sin tabúes, no culpabilizar.",
+                    soporte: "Espacios Amigables Tarapacá: Atención confidencial, gratuita y cercana para el cuidado de tu desarrollo (10 a 13 años).",
+                    cuandoConsultar: "Dudas sobre tu primera menstruación (menarquia), dolores intensos en tu periodo, cambios corporales que te asusten, o si alguien te hace sentir incómoda, presionada o asustada en internet o en persona."
+                };
+            }
+        }
+
+        class PerfilAdolescenteLocal {
+            getContenido() {
+                return {
+                    enfoque: "Integral: Decisiones informadas, relaciones respetuosas, prevención de riesgos y fomento de la autonomía.",
+                    menu: [
+                        { titulo: "Consentimiento Pleno", detalle: "Debe ser libre, claro y reversible. La presión, el control o el miedo NO son consentimiento." },
+                        { titulo: "Prevención Activa", detalle: "Uso correcto del condón, métodos anticonceptivos y acceso a anticoncepción de emergencia." },
+                        { titulo: "ITS y Salud", detalle: "Señales de alerta, testeo rápido y búsqueda de atención médica sin vergüenza ni mitos." },
+                        { titulo: "Salud Mental y Vínculos", detalle: "Manejo de celos, sexting seguro, prevención de violencia en el pololeo y redes de apoyo." }
+                    ],
+                    acompanamiento: "Ruta para Padres/Docentes: Promover el pensamiento crítico sobre el cuerpo, la igualdad y la responsabilidad sin invadir.",
+                    soporte: "Espacios Amigables & CESFAM Tarapacá: Consejería y entrega de métodos anticonceptivos/píldora de emergencia para jóvenes de 14 a 18 años.",
+                    cuandoConsultar: "Inicio de vida sexual activa, consejería o entrega confidencial de métodos anticonceptivos (incluida la píldora de emergencia), sospechas de Infecciones de Transmisión Sexual (ITS) o control de violencia en el pololeo."
+                };
+            }
+        }
+
+        class PerfilAdultoLocal {
+            getContenido() {
+                return {
+                    enfoque: "Integral: Autonomía, bienestar sexual, co-responsabilidad, placer cuidado y relaciones adultas sanas.",
+                    menu: [
+                        { titulo: "Planificación Familiar", detalle: "Comparativa de métodos, continuidad de uso y guía en la consulta profesional." },
+                        { titulo: "Controles Preventivos", detalle: "Testeo oportuno de ITS, examen PAP, vacuna VPH y chequeos preventivos de mama." },
+                        { titulo: "Relaciones Adultas Sanas", detalle: "Comunicación, acuerdos mutuos, límites claros y autocuidado emocional." },
+                        { titulo: "Derechos Reproductivos", detalle: "Confidencialidad en la atención, trato digno e información científica oportuna." }
+                    ],
+                    acompanamiento: "Ruta de Apoyo: Acompañar en el ejercicio autónomo de controles ginecológicos y derivar ante dolores de pelvis persistentes.",
+                    soporte: "Red de Salud Tarapacá: Acceso a Matronería en CESFAM y derivaciones oportunas ante sospechas de ITS, dolores o dudas de anticoncepción.",
+                    cuandoConsultar: "Controles preventivos ginecológicos anuales (Papanicolaou - PAP, examen físico de mamas), planificación familiar, dolores ginecológicos severos o persistentes, o para orientación sobre derechos reproductivos."
+                };
+            }
+        }
+
+        // Estructuras para Decorator & Observer Local
+        class SubjectLocal {
+            constructor() { this.observers = []; }
+            subscribe(observer) { this.observers.push(observer); }
+            notify(data) { this.observers.forEach(o => o.update(data)); }
+            getListaNombres() { return this.observers.map(o => o.nombre); }
+        }
+
+        class ContactoObserverLocal {
+            constructor(nombre) { this.nombre = nombre; }
+            update(data) {
+                console.log(`[Observer Simulador] SMS despachado a ${this.nombre}: ${data.mensaje}`);
+            }
+        }
+
+        function decorarAlertaLocal(alerta) {
+            alerta.severidad = "CRÍTICA";
+            alerta.mensaje = `[${alerta.severidad}] ` + alerta.mensaje;
+            alerta.timestamp = new Date().toLocaleTimeString();
+            alerta.esAutenticada = true;
+            return alerta;
+        }
+
+        // Instancia global de Observadores Locales
+        const mockPanicoSubject = new SubjectLocal();
+        mockPanicoSubject.subscribe(new ContactoObserverLocal("Mamá (Contacto SOS)"));
+        mockPanicoSubject.subscribe(new ContactoObserverLocal("Papá (Contacto SOS)"));
+
+        // --- SISTEMA DE LOGS INTERACTIVO ---
+        function registrarLog(mensaje, codigoStatus = 200, tipo = 'success') {
+            const consola = document.getElementById('console-logs');
+            if (!consola) return;
+            const ahora = new Date().toLocaleTimeString();
+            
+            let claseCss = 'success';
+            if (codigoStatus >= 400) claseCss = 'error';
+            else if (tipo === 'info') claseCss = 'info';
+            else if (tipo === 'warning') claseCss = 'warning';
+
+            const logEntry = document.createElement('div');
+            logEntry.className = `audit-entry ${claseCss}`;
+            logEntry.innerHTML = `[${ahora}] [HTTP ${codigoStatus}] ${mensaje}`;
+            
+            consola.appendChild(logEntry);
+            consola.scrollTop = consola.scrollHeight;
+        }
+
+        // --- DETECTOR DINÁMICO DE CANAL (REAL VS SANDBOX) ---
+        let backendDisponible = null;
+
+        async function chequearDisponibilidadBackend() {
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre: 'ema' })
+                });
+                backendDisponible = true;
+                const badge = document.getElementById('badge-modo');
+                if (badge) {
+                    badge.innerText = "ONLINE (NodeJS Backend)";
+                    badge.className = "audit-badge online";
+                }
+                registrarLog("Servidor Express detectado. Conexión establecida de forma segura.", 200, 'info');
+            } catch (err) {
+                backendDisponible = false;
+                const badge = document.getElementById('badge-modo');
+                if (badge) {
+                    badge.innerText = "SANDBOX OFFLINE MODE";
+                    badge.className = "audit-badge sandbox";
+                }
+                registrarLog("Express Offline. Iniciando simulación local de patrones (Fábrica, Observador, Decorador).", 200, 'warning');
+            }
+            
+            // Una vez detectado el canal, cargar el dashboard
+            if (usuarioSesion) {
+                cargarDashboard();
+            }
+        }
+
+        // Ejecutar verificación de canal
+        chequearDisponibilidadBackend();
+
+        // --- RENDERIZADO DEL DASHBOARD ---
+        async function cargarDashboard() {
+            document.getElementById('user-display').innerText = `Hola, ${usuarioSesion.nombre} (${usuarioSesion.edad} años)`;
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/perfil/${usuarioSesion.edad}`);
+                    registrarLog(`Consumo de perfil vía Factory Pattern para edad: ${usuarioSesion.edad}`, res.status);
+                    const data = await res.json();
+                    renderizarPerfilUI(data);
+                } catch (err) {
+                    registrarLog("Error al recuperar los datos educativos del servidor.", 500);
+                }
+            } else {
+                registrarLog(`[Simulación] Evaluando tramo por edad con Factory Method local para: ${usuarioSesion.edad} años`, 200, 'info');
+                const perfil = PerfilFactoryLocal.crearPerfil(usuarioSesion.edad);
+                const dataSimulada = {
+                    perfil_tipo: perfil.constructor.name.replace('PerfilLocal', ''),
+                    contenido: perfil.getContenido()
+                };
+                renderizarPerfilUI(dataSimulada);
+            }
+
+            // Cargar datos transaccionales del ciclo y las citas
+            actualizarListaCiclos();
+            actualizarListaCitas();
+        }
+
+        function renderizarPerfilUI(data) {
+            document.getElementById('tipo-perfil').innerText = data.perfil_tipo.replace('Perfil', '');
+            document.getElementById('perfil-enfoque').innerText = data.contenido.enfoque;
+
+            // Renderizar temarios
+            const menuHtml = data.contenido.menu.map(item => `
+                <div class="edu-card">
+                    <div class="edu-card-header">
+                        <div class="edu-icon-wrapper">
+                            ${obtenerIconoSvg(item.titulo)}
+                        </div>
+                        <h4 class="edu-card-title">${item.titulo}</h4>
+                    </div>
+                    <p class="edu-card-detail">${item.detalle}</p>
+                </div>
+            `).join('');
+            document.getElementById('perfil-menu-bloques').innerHTML = menuHtml;
+
+            // Consejos de acompañamiento
+            document.getElementById('bloque-acompanar').innerHTML = `
+                <strong>Acompañar sin invadir (Ruta de Apoyo):</strong>
+                <span>${data.contenido.acompanamiento.replace('Ruta para Cuidadores: ', '').replace('Ruta para Padres/Docentes: ', '').replace('Ruta de Apoyo: ', '')}</span>
+            `;
+
+            // Ayuda territorial con "Cuándo consultar" adaptativo
+            document.getElementById('bloque-chile-texto').innerHTML = `
+                <p style="font-weight: 700; color: var(--primary-dark); margin-bottom: 8px;">
+                    ${data.contenido.soporte}
+                </p>
+                <div class="territorial-consult-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <span>Cuándo consultar:</span>
+                </div>
+                <p class="territorial-consult-text">
+                    ${data.contenido.cuandoConsultar}
+                </p>
+            `;
+
+            // Condicional de Negocio: Agenda Médica para mayores de 13 años
+            const moduloCitas = document.getElementById('modulo-citas-medicas');
+            if (usuarioSesion.edad >= 14) {
+                moduloCitas.classList.remove('hidden');
+            } else {
+                moduloCitas.classList.add('hidden');
+            }
+        }
+
+        // --- GESTIÓN INTERACTIVA DE CICLOS MENSTRUALES ---
+        async function registrarCicloMenstrual() {
+            const inicioVal = document.getElementById('ciclo-inicio').value;
+            const terminoVal = document.getElementById('ciclo-termino').value;
+            const errorDiv = document.getElementById('ciclo-error');
+            errorDiv.classList.add('hidden');
+
+            if (!inicioVal || !terminoVal) {
+                errorDiv.innerText = "Por favor ingresa ambas fechas.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Regla de Negocio (RB-09): Fecha de término no puede ser anterior a la de inicio
+            if (new Date(terminoVal) < new Date(inicioVal)) {
+                errorDiv.innerText = "La fecha de término no puede ser anterior a la fecha de inicio.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/ciclo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            usuario: usuarioSesion.nombre,
+                            fechaInicio: inicioVal,
+                            fechaTermino: terminoVal
+                        })
+                    });
+                    registrarLog(`Ciclo menstrual guardado para: ${usuarioSesion.nombre}`, res.status);
+                    actualizarListaCiclos();
+                } catch (err) {
+                    registrarLog("Error al comunicarse con el servidor para registrar el ciclo.", 500);
+                }
+            } else {
+                // Flujo Sandbox Local (Aislado por usuario)
+                const key = usuarioSesion.nombre.toLowerCase();
+                if (!ciclosSandbox[key]) ciclosSandbox[key] = [];
+                
+                const fechaInicio = new Date(inicioVal);
+                const fechaTermino = new Date(terminoVal);
+                const duracion = Math.round((fechaTermino - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+
+                ciclosSandbox[key].push({
+                    fechaInicio: inicioVal,
+                    fechaTermino: terminoVal,
+                    duracion
+                });
+
+                registrarLog(`[Sandbox] Registro de ciclo guardado localmente (${duracion} días de duración).`, 201);
+                actualizarListaCiclos();
+            }
+
+            // Limpieza de inputs
+            document.getElementById('ciclo-inicio').value = '';
+            document.getElementById('ciclo-termino').value = '';
+        }
+
+        async function actualizarListaCiclos() {
+            const listContainer = document.getElementById('ciclos-lista');
+            listContainer.innerHTML = '';
+
+            let ciclos = [];
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/ciclos/${usuarioSesion.nombre}`);
+                    if (res.ok) ciclos = await res.json();
+                } catch (e) {
+                    registrarLog("Error al recuperar ciclos del servidor.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                ciclos = ciclosSandbox[key] || [];
+            }
+
+            if (ciclos.length === 0) {
+                listContainer.innerHTML = `<p class="history-empty">No hay ciclos ingresados todavía.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = ciclos.map((c, i) => `
+                <div class="history-item">
+                    <div>
+                        <span class="history-item-label">Ciclo #${i + 1}</span> 
+                        <span class="history-item-dates">${c.fechaInicio} al ${c.fechaTermino}</span>
+                    </div>
+                    <span class="history-item-badge">${c.duracion} días</span>
+                </div>
+            `).join('');
+        }
+
+        // --- GESTIÓN INTERACTIVA DE CITAS MÉDICAS ---
+        async function registrarCitaMedica() {
+            const fechaVal = document.getElementById('cita-fecha').value;
+            const motivoVal = document.getElementById('cita-motivo').value;
+            const errorDiv = document.getElementById('modulo-citas-medicas').querySelector('#cita-error');
+            errorDiv.classList.add('hidden');
+
+            if (!fechaVal || !motivoVal) {
+                errorDiv.innerText = "Por favor completa la fecha y el motivo/centro.";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/cita', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            usuario: usuarioSesion.nombre,
+                            fecha: fechaVal,
+                            motivo: motivoVal
+                        })
+                    });
+                    registrarLog(`Cita médica agendada para: ${usuarioSesion.nombre}`, res.status);
+                    actualizarListaCitas();
+                } catch (err) {
+                    registrarLog("Error de conexión al agendar cita médica.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                if (!citasSandbox[key]) citasSandbox[key] = [];
+
+                citasSandbox[key].push({
+                    fecha: fechaVal,
+                    motivo: motivoVal
+                });
+
+                registrarLog(`[Sandbox] Cita médica para "${motivoVal}" agendada de forma local.`, 201);
+                actualizarListaCitas();
+            }
+
+            document.getElementById('cita-fecha').value = '';
+            document.getElementById('cita-motivo').value = '';
+        }
+
+        async function eliminarCitaMedica(index) {
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/cita/${usuarioSesion.nombre}/${index}`, {
+                        method: 'DELETE'
+                    });
+                    registrarLog(`Cita médica removida de la agenda`, res.status);
+                    actualizarListaCitas();
+                } catch (e) {
+                    registrarLog("Error al eliminar la cita médica en el servidor.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                if (citasSandbox[key]) {
+                    citasSandbox[key].splice(index, 1);
+                    registrarLog(`[Sandbox] Cita médica removida de la agenda local.`, 200);
+                    actualizarListaCitas();
+                }
+            }
+        }
+
+        async function actualizarListaCitas() {
+            const listContainer = document.getElementById('modulo-citas-medicas').querySelector('#citas-lista');
+            listContainer.innerHTML = '';
+
+            let citas = [];
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch(`/api/citas/${usuarioSesion.nombre}`);
+                    if (res.ok) citas = await res.json();
+                } catch (e) {
+                    registrarLog("Error al recuperar la agenda de citas.", 500);
+                }
+            } else {
+                const key = usuarioSesion.nombre.toLowerCase();
+                citas = citasSandbox[key] || [];
+            }
+
+            if (citas.length === 0) {
+                listContainer.innerHTML = `<p class="history-empty">No hay citas médicas agendadas.</p>`;
+                return;
+            }
+
+            listContainer.innerHTML = citas.map((c, i) => `
+                <div class="history-item teen-item">
+                    <div>
+                        <span class="history-item-label teen-item-label">${c.fecha}</span> 
+                        <span class="history-item-dates" style="font-weight: 600;">${c.motivo}</span>
+                    </div>
+                    <button onclick="eliminarCitaMedica(${i})" class="btn-delete-cita">Eliminar</button>
+                </div>
+            `).join('');
+        }
+
+        // Paso 4: Botón de Pánico SOS (Decorator + Observer)
+        async function dispararSOS() {
+            const alertDiv = document.getElementById('sos-success-msg');
+            alertDiv.classList.add('hidden');
+
+            if (backendDisponible) {
+                try {
+                    const res = await fetch('/api/panico');
+                    const data = await res.json();
+                    
+                    registrarLog(`[DECORATOR] Alerta formateada por backend: ${data.alerta.mensaje} (${data.alerta.ubicacion})`, res.status);
+                    
+                    alertDiv.innerHTML = `
+                        <strong>¡Alerta de Auxilio Enviada!</strong>
+                        <span>SMS Decorado: ${data.alerta.mensaje}</span><br>
+                        <span>Coordenadas: ${data.alerta.ubicacion}</span><br>
+                        <span>Contactos Notificados: ${data.contactosNotificados.join(', ')}</span>
+                        <small>Tiempos de respuesta síncronos garantizados &lt; 2 seg (RNF-02).</small>
+                    `;
+                    alertDiv.classList.remove('hidden');
+                } catch (err) {
+                    registrarLog("Error al disparar alerta crítica hacia la API.", 500);
+                }
+            } else {
+                // Canal Simulación (Sandbox)
+                registrarLog("[Simulación SOS] Enviando alerta decorada localmente...", 200, 'warning');
+                
+                const alertaBase = {
+                    mensaje: "¡Emergencia detectada! Necesito ayuda urgente.",
+                    ubicacion: "-20.21, -70.14"
+                };
+
+                const alertaDecorada = decorarAlertaLocal(alertaBase);
+                registrarLog(`[DECORATOR] Alerta decorada localmente: ${alertaDecorada.mensaje}`, 200, 'info');
+
+                alertDiv.innerHTML = `
+                    <strong>¡Alerta de Auxilio Enviada! (Modo Sandbox)</strong>
+                    <span>SMS Decorado: ${alertaDecorada.mensaje}</span><br>
+                    <span>Coordenadas: ${alertaDecorada.ubicacion}</span><br>
+                    <span>Contactos Notificados: ${mockPanicoSubject.getListaNombres().join(', ')}</span>
+                    <small>Simulación de respuesta inmediata síncrona &lt; 0.05 segundos.</small>
+                `;
+                alertDiv.classList.remove('hidden');
+            }
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('usuarioSesion');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
