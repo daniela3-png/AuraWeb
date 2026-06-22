@@ -164,6 +164,10 @@ app.get('/api/panico', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Corriendo de forma segura en: http://localhost:${PORT}`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Corriendo de forma segura en: http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
